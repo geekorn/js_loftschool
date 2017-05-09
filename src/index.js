@@ -51,9 +51,7 @@ function returnFnResult(fn) {
  При вызове F, переданное число должно быть увеличено на единицу и возвращено из F
  */
 function returnCounter(number) {
-    if (number == undefined) {
-        number = 0;
-    }
+    number = number || 0;
 
     function F() {
         return ++number;
@@ -70,9 +68,10 @@ function returnCounter(number) {
  */
 function bindFunction(fn) {
     for (var i = 1; i < arguments.length; i++) {
-        return fn.bind(arguments[i]);
+        fn = fn.bind(null, arguments[i]);
     }
 
+    return fn;
 }
 
 export {
