@@ -105,38 +105,45 @@ function calculator(number) {
     }
 
     function _sum() {
+        var result = number;
         for (var i = 0; i < arguments.length; i++) {
-            number += arguments[i];
+            result += arguments[i];
         }
 
-        return number;
+        return result;
     }
 
     function _dif() {
+        var result = number;
+
         for (var i = 0; i < arguments.length; i++) {
-            number -= arguments[i];
+            result -= arguments[i];
         }
 
-        return number;
+        return result;
     }
 
     function _div() {
+        var result = number;
+
         for (var i = 0; i < arguments.length; i++) {
             if (arguments[i] === 0) {
                 throw new Error('division by 0')
             }
-            number /= arguments[i];
+            result /= arguments[i];
         }
 
-        return number;
+        return result;
     }
 
     function _mul() {
+        var result = number;
+
         for (var i = 0; i < arguments.length; i++) {
-            number *= arguments[i];
+            result *= arguments[i];
         }
 
-        return number;
+        return result;
     }
 
     return {
