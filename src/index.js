@@ -31,7 +31,7 @@ function map(array, fn) {
 function reduce(array, fn, initial) {
     var i = 0;
 
-    if (typeof initial === undefined) {
+    if (typeof initial === 'undefined') {
         initial = initial || array[0];
         i = 1
     }
@@ -69,7 +69,9 @@ function getEnumProps(obj) {
     var result = [];
 
     for (var prop in obj) {
-        result.push(prop);
+        if (obj.hasOwnProperty(prop)) {
+            result.push(prop);
+        }
     }
 
     return result;
@@ -83,7 +85,9 @@ function upperProps(obj) {
     var result = [];
 
     for (var prop in obj) {
-        result.push(prop.toUpperCase());
+        if (obj.hasOwnProperty(prop)) {
+            result.push(prop.toUpperCase());
+        }
     }
 
     return result;
@@ -94,6 +98,44 @@ function upperProps(obj) {
  Напишите аналог встроенного метода slice для работы с массивами
  */
 function slice(array, from, to) {
+    var result = [],
+        start, end;
+
+    // значение по умолчанию и проверка на не число
+    if (typeof from === 'undefined') {
+        from = 0;
+    } else if (typeof from !== 'number') {
+        throw new Error('argument (from) is not a number');
+    }
+
+    if (typeof to === 'undefined') {
+        to = array.length;
+    } else if (typeof to !== 'number') {
+        throw new Error('argument (to) is not a number');
+    }
+    // проверка аргументов на величину (должны быть меньше длины массива)
+    if (Math.abs(from) > array.length) {
+        from = (from < 0) ? 0 : array.length;
+    }
+    if (Math.abs(to) > array.length) {
+        to = (to < 0) ? 0 : array.length;
+    }
+
+    // from = (Math.abs(from) < array.length) ? from :
+    //     (from < 0) ? 0 : array.length;
+    // to = (Math.abs(to) < array.length) ? to :
+    //     (to < 0) ? 0 : array.length;
+
+    // обработка отрицательного аргумента from
+    start = (from < 0) ? (array.length + from) : from;
+    // обработка отрицательного to
+    end = (to < 0) ? (array.length + to) : to;
+
+    for (var i = start; i < end; i++) {
+        result.push(array[i]);
+    }
+
+    return result;
 }
 
 /*
@@ -102,6 +144,18 @@ function slice(array, from, to) {
  Proxy должен перехватывать все попытки записи значений свойств и возводить это значение в квадрат
  */
 function createProxy(obj) {
+    obj = new Proxy(obj, {
+        set(target, prop, value) {
+            if (typeof value !== 'number') {
+                throw new Error('value is not a number');
+            }
+            target[prop] = value * value;
+
+            return true;
+        }
+    });
+
+    return obj;
 }
 
 export {
