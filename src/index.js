@@ -18,15 +18,13 @@ function isAllTrue(array, fn) {
         throw new Error('fn is not a function');
     }
 
-    var errors = [];
-
     for (var i = 0; i < array.length; i++) {
         if (!fn(array[i])) {
-            errors.push(array[i]);
+            return false
         }
     }
 
-    return (errors.length) ? false : true;
+    return true;
 }
 
 /*
@@ -46,15 +44,13 @@ function isSomeTrue(array, fn) {
         throw new Error('fn is not a function');
     }
 
-    var noErrors = [];
-
     for (var i = 0; i < array.length; i++) {
         if (fn(array[i])) {
-            noErrors.push(array[i]);
+            return true;
         }
     }
 
-    return (noErrors.length) ? true : false;
+    return false;
 }
 
 /*
@@ -98,14 +94,15 @@ function returnBadArguments(fn) {
  - какой-либо из аргументов div является нулем (с текстом "division by 0")
  */
 function calculator(number) {
-    number = number || 0;
-
-    if (typeof number !== 'number') {
+    if (typeof number === 'undefined') {
+        number = 0;
+    } else if (typeof number !== 'number') {
         throw new Error('number is not a number');
     }
 
     function _sum() {
         var result = number;
+
         for (var i = 0; i < arguments.length; i++) {
             result += arguments[i];
         }
