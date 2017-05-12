@@ -104,6 +104,9 @@ function calculator(number) {
         var result = number;
 
         for (var i = 0; i < arguments.length; i++) {
+            if (typeof arguments[i] !== 'number') {
+                throw new Error('argument is not a number');
+            }
             result += arguments[i];
         }
 
@@ -114,6 +117,9 @@ function calculator(number) {
         var result = number;
 
         for (var i = 0; i < arguments.length; i++) {
+            if (typeof arguments[i] !== 'number') {
+                throw new Error('argument is not a number');
+            }
             result -= arguments[i];
         }
 
@@ -127,6 +133,9 @@ function calculator(number) {
             if (arguments[i] === 0) {
                 throw new Error('division by 0')
             }
+            if (typeof arguments[i] !== 'number') {
+                throw new Error('argument is not a number');
+            }
             result /= arguments[i];
         }
 
@@ -137,6 +146,9 @@ function calculator(number) {
         var result = number;
 
         for (var i = 0; i < arguments.length; i++) {
+            if (typeof arguments[i] !== 'number') {
+                throw new Error('argument is not a number');
+            }
             result *= arguments[i];
         }
 
