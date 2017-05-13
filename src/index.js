@@ -32,7 +32,7 @@ function reduce(array, fn, initial) {
     var i = 0;
 
     if (typeof initial === 'undefined') {
-        initial = initial || array[0];
+        initial = array[0];
         i = 1
     }
 
@@ -98,8 +98,8 @@ function upperProps(obj) {
  Напишите аналог встроенного метода slice для работы с массивами
  */
 function slice(array, from, to) {
-    var result = [],
-        start, end;
+    var start, end,
+        result = [];
 
     // значение по умолчанию и проверка на не число
     if (typeof from === 'undefined') {
@@ -120,7 +120,6 @@ function slice(array, from, to) {
     if (Math.abs(to) > array.length) {
         to = (to < 0) ? 0 : array.length;
     }
-
     // from = (Math.abs(from) < array.length) ? from :
     //     (from < 0) ? 0 : array.length;
     // to = (Math.abs(to) < array.length) ? to :
