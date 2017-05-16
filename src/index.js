@@ -66,6 +66,7 @@ function hasProperty(obj, prop) {
  Функция должна получить все перечисляемые свойства объекта и вернуть их в виде массива
  */
 function getEnumProps(obj) {
+    // return Object.keys(obj);
     var result = [];
 
     for (var prop in obj) {
