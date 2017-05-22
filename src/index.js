@@ -141,24 +141,15 @@ function deleteTextNodesRecursive(where) {
         return false;
     }
 
-    Array.from(where.childNodes, child => {
-        if (child.nodeType === 3) {
-            child.parentNode.removeChild(child);
-        } else if (child.nodeType === 1) {
-            deleteTextNodesRecursive(child);
-        }
-    });
+    let arr = Array.from(where.childNodes);
 
-    // for (let i = 0; i < where.childNodes.length; i++) {
-    //     let node = where.childNodes[i];
-    //
-    //     if (node.nodeType === 3) {
-    //         where.removeChild(node);
-    //         i--;
-    //     } else if (node.nodeType === 1) {
-    //         deleteTextNodesRecursive(node);
-    //     }
-    // }
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i].nodeType === 3) {
+            arr[i].parentNode.removeChild(arr[i]);
+        } else if (arr[i].nodeType === 1) {
+            deleteTextNodesRecursive(arr[i]);
+        }
+    }
 }
 
 /**
@@ -252,8 +243,8 @@ function collectDOMStat(root) {
  * }
  */
 function observeChildNodes(where, fn) {
-    let observer = new MutationObserver( mutations => {
-        mutations.forEach( mutation => {
+    let observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
             if (mutation.type !== 'childList') {
                 return
             }
@@ -274,7 +265,7 @@ function observeChildNodes(where, fn) {
         })
     });
 
-    let config = { childList: true, subtree: true };
+    let config = {childList: true, subtree: true};
     observer.observe(where, config);
 }
 
