@@ -61,16 +61,16 @@ function prepend(what, where) {
  * т.к. следующим соседом этих элементов является элемент с тегом P
  */
 function findAllPSiblings(where) {
-    let elems = where.children,
-        result = [];
-
     if (where.nodeType !== 1) {
         return false;
     }
 
-    for (let i = 0; i < elems.length; i++) {
-        if (elems[i].tagName == 'P') {
-            result.push(elems[i - 1]);
+    let elems = where.children,
+        result = [];
+
+    for (let i = 0; i < elems.length - 1; i++) {
+        if (elems[i].nextElementSibling.tagName === 'P') {
+            result.push(elems[i]);
         }
     }
 
@@ -119,13 +119,11 @@ function deleteTextNodes(where) {
         return false;
     }
 
-    for (let i = 0; i < where.childNodes.length; i++) {
-        let node = where.childNodes[i];
-
-        if (node.nodeType === 3) {
-            where.removeChild(node);
+    Array.from(where.childNodes, child => {
+        if (child.nodeType === 3) {
+            child.parentNode.removeChild(child);
         }
-    }
+    });
 }
 
 /**
@@ -143,16 +141,24 @@ function deleteTextNodesRecursive(where) {
         return false;
     }
 
-    for (let i = 0; i < where.childNodes.length; i++) {
-        let node = where.childNodes[i];
-
-        if (node.nodeType === 3) {
-            where.removeChild(node);
-            i--;
-        } else if (node.nodeType === 1) {
-            deleteTextNodesRecursive(node);
+    Array.from(where.childNodes, child => {
+        if (child.nodeType === 3) {
+            child.parentNode.removeChild(child);
+        } else if (child.nodeType === 1) {
+            deleteTextNodesRecursive(child);
         }
-    }
+    });
+
+    // for (let i = 0; i < where.childNodes.length; i++) {
+    //     let node = where.childNodes[i];
+    //
+    //     if (node.nodeType === 3) {
+    //         where.removeChild(node);
+    //         i--;
+    //     } else if (node.nodeType === 1) {
+    //         deleteTextNodesRecursive(node);
+    //     }
+    // }
 }
 
 /**
