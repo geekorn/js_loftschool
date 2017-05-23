@@ -14,7 +14,7 @@ loaders.push({
 });
 
 module.exports = {
-    entry: './src/index.js',
+    entry: './src/dnd.js',
     output: {
         filename: '[hash].js',
         path: path.resolve('dist')
@@ -33,7 +33,7 @@ module.exports = {
         new ExtractTextPlugin('styles.css'),
         new HtmlPlugin({
             title: 'Loft School sample project',
-            template: 'index.hbs'
+            template: 'dnd.hbs'
         }),
         new CleanWebpackPlugin(['dist'])
     ]
