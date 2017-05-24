@@ -13,15 +13,101 @@
  * @example
  * homeworkContainer.appendChild(...);
  */
-let randomColor = () => "#" + ((1 << 24) * Math.random() | 0).toString(16);
+
+let randomColor = () => '#' + ((1 << 23) * Math.random() | 0).toString(16);
 let randomInt = (max) => Math.floor(Math.random() * (max - 1) + 1);
 
-// let btn = document.querySelector('.btn');
-// btn.style.backgroundColor = randomColor();
-// btn.style.color = randomColor();
-
 let homeworkContainer = document.querySelector('#homework-container');
+let addDivButton = homeworkContainer.querySelector('#addDiv');
+let conteinerCoords = homeworkContainer.getBoundingClientRect();
+let elem = {};
 
+// console.log(conteinerCoords);
+// console.log('homeworkContainer.offsetWidth = %s', homeworkContainer.offsetWidth, homeworkContainer);
+
+addDivButton.addEventListener('click', function () {
+    let div = createDiv();
+
+    homeworkContainer.appendChild(div);
+});
+
+// или использовать HTML5 D&D - https://www.html5rocks.com/ru/tutorials/dnd/basics/
+homeworkContainer.addEventListener('mouseover', e => {
+    if (e.target.classList.contains('draggable-div')) {
+        e.target.style.cursor = 'move';
+    }
+});
+
+homeworkContainer.addEventListener('mousedown', function (e) {
+    e.preventDefault();
+
+    // запомнить элемент на котором сработало событие
+    // если это див, то запомнить его координаты относительно координат клика
+    if (e.target.classList.contains('draggable-div')) {
+        elem.node = e.target;
+
+        // вычисляем координаты относительно левого верхнего угла контейнера
+        elem.cursorX = e.clientX - conteinerCoords.left;
+        elem.cursorY = e.clientY - conteinerCoords.top;
+
+        // разница между координатами дива и курсором
+        elem.x = elem.cursorX - elem.node.offsetLeft;
+        elem.y = elem.cursorY - elem.node.offsetTop;
+
+        console.log('координаты дива в момент нажатия клавиши %s %s', elem.node.offsetTop, elem.node.offsetLeft);
+        console.log('координаты курсора в момент нажатия клавиши %s %s', elem.cursorY, elem.cursorX);
+    }
+});
+
+homeworkContainer.addEventListener('mousemove', function moveElement(e) {
+    e.preventDefault();
+    // проверяем что клик произошел на элементе  'draggable-div'
+    if (e.target !== elem.node) {
+        return;
+    }
+
+    // проверить не вылезает ли див из контейнера
+    let coordX = elem.cursorX - elem.x;
+    let coordY = elem.cursorY - elem.y;
+    let posX, posY;
+
+    // let posX = (coordX <= 0) ? 0 :
+    //         (coordX + elem.node.offsetWidth > homeworkContainer.offsetWidth) ? homeworkContainer.offsetWidth - elem.node.offsetWidth :
+    //         coordX;
+    // let posY = (coordY <= 0) ? 0 :
+    //     (coordY + elem.node.offsetHeight > homeworkContainer.offsetHeight) ? homeworkContainer.offsetHeight - elem.node.offsetHeight :
+    //         coordY;
+    if (coordX <= 0) {
+        posX = 0;
+    } else if (coordX + elem.node.offsetWidth > homeworkContainer.offsetWidth) {
+        posX = homeworkContainer.offsetWidth - elem.node.offsetWidth;
+    } else {
+        posX = coordX;
+    }
+
+    if (coordY <= 0) {
+        posY = 0;
+    } else if (coordY + elem.node.offsetHeight > homeworkContainer.offsetHeight) {
+        posY = homeworkContainer.offsetHeight - elem.node.offsetHeight;
+    } else {
+        posY = coordY;
+    }
+
+    elem.node.style.left = posX +'px';
+    elem.node.style.top = posY +'px';
+
+    console.log('координаты дива в момент перемещения %s %s', elem.node.offsetTop, elem.node.offsetLeft);
+    console.log('координаты курсора в момент перемещения %s %s', elem.cursorY, elem.cursorX);
+
+    // обновляен координаты перемещения, учитывая положение контейнера
+    elem.cursorX = e.clientX - conteinerCoords.left;
+    elem.cursorY = e.clientY - conteinerCoords.top;
+});
+homeworkContainer.addEventListener('mouseup', function () {
+    elem.node = undefined;
+    // удалить координаты
+    // console.log(elem)
+});
 
 /**
  * Функция должна создавать и возвращать новый div с классом draggable-div и случайными размерами/цветом/позицией
@@ -45,7 +131,6 @@ function createDiv() {
     elem.style.top = elemOffsetTop + 'px';
     elem.style.left = elemOffsetLeft + 'px';
 
-    console.log(elem);
     return elem;
 }
 
@@ -54,68 +139,10 @@ function createDiv() {
  *
  * @param {Element} target
  */
-function addListeners(target) {
-    let elem = {};
+// function addListeners() {
+//
+// }
 
-    target.addEventListener('mouseover', function () {
-        this.style.cursor = 'move';
-    });
-
-    homeworkContainer.addEventListener('mousedown', function (e) {
-        e.preventDefault();
-
-        // зажали клавишу, если запомнить координаты нажатия
-        if (e.target.classList.contains('draggable-div')) {
-            elem.node = e.target;
-            elem.cursorX = e.clientX;
-            elem.cursorY = e.clientY;
-        }
-
-        // console.log(elem);
-    });
-    homeworkContainer.addEventListener('mousemove', function moveElement(e) {
-        e.preventDefault();
-        // проверяем что клик произошел на элементе  'draggable-div'
-        if (!elem.node) {
-            return;
-        }
-
-        // проверить не вылезает ли див из контейнера
-        let coordTopDifference = elem.cursorY - elem.node.offsetTop;
-        let coordLeftDifference = elem.cursorY - elem.node.offsetLeft;
-        elem.coordTop = e.clientY - coordTopDifference;+
-
-            elem.node.style.top = elem.coordTop;
-
-        // console.log(e);
-        console.log('Координаты курсора: %s %s /n координаты дива: %s %s ', e.clientX, e.clientY, coordLeftDifference, elem.coordTop);
-        // console.log(this);
-
-
-
-    });
-    homeworkContainer.addEventListener('mouseup', function () {
-        elem.node = undefined;
-        // удалить координаты
-
-        console.log(elem);
-    });
-}
-
-let addDivButton = homeworkContainer.querySelector('#addDiv');
-
-addDivButton.addEventListener('click', function () {
-    // создать новый div
-    let div = createDiv();
-
-    // добавить на страницу
-    homeworkContainer.appendChild(div);
-    // назначить обработчики событий мыши для реализации d&d
-    addListeners(div);
-    // можно не назначать обработчики событий каждому div в отдельности, а использовать делегирование
-    // или использовать HTML5 D&D - https://www.html5rocks.com/ru/tutorials/dnd/basics/
-});
-
-// export {
-//     createDiv
-// };
+export {
+    createDiv
+};
