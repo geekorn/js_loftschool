@@ -44,21 +44,12 @@ let listTable = homeworkContainer.querySelector('#list-table tbody');
  * @param {string} name
  * @param {string} value
  */
-function addCookie(name, value) {
-    if (name && value) {
-        document.cookie = name + '=' + value;
-    }
-}
 
 /**
  * Функция удаления кук
  * @param {string} name
  */
-function removeCookie(name) {
-    if (getCookie().hasOwnProperty(name)) {
-        document.cookie = name + '=; expires=' + (new Date(0)).toUTCString();
-    }
-}
+import { createCookie, deleteCookie } from './index.js'
 
 /**
  * Функция получает все куки и возвращает объект {name: value}
@@ -107,6 +98,10 @@ function filterCookies(chunk) {
     return filteredCokies;
 }
 
+/**
+ * Функция создания таблицы
+ * @param {object} cookies - список из котороого надо сформировать таблицу
+ */
 function createTable(cookies) {
     while (listTable.rows[0]) {
         listTable.deleteRow(0);
@@ -148,7 +143,7 @@ listTable.addEventListener('click', function (e) {
     }
 
     this.deleteRow(rowIndex);
-    removeCookie(name);
+    deleteCookie(name);
 });
 
 // добавление кук
@@ -157,7 +152,7 @@ addButton.addEventListener('click', () => {
     let val = addValueInput.value;
     let filter = filterNameInput.value;
 
-    addCookie(name, val);
+    createCookie(name, val);
 
     if (filter) {
         createTable(filterCookies(filter));

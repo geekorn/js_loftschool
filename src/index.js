@@ -32,7 +32,10 @@ function closeWindow(window) {
  * @param value - значение
  */
 function createCookie(name, value) {
-    document.cookie = `${name}=${value}`;
+    if (name && value) {
+        document.cookie = name + '=' + value;
+        // document.cookie = `${name}=${value}`;
+    }
 }
 
 /**
@@ -41,9 +44,7 @@ function createCookie(name, value) {
  * @param name - имя
  */
 function deleteCookie(name) {
-    let date = new Date(0);
-
-    document.cookie = name + '=; expires=' + date.toUTCString();
+    document.cookie = name + '=; expires=' + (new Date(0)).toUTCString();
 }
 
 export {
