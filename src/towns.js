@@ -35,40 +35,8 @@ let homeworkContainer = document.querySelector('#homework-container');
  *
  * @return {Promise<Array<{name: string}>>}
  */
-function loadTowns() {
 
-    return new Promise(function (resolve, reject) {
-        let xhr = new XMLHttpRequest();
-
-        xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json', true);
-        xhr.send();
-        xhr.addEventListener('load', () => {
-            if (xhr.status !== 200) {
-                // обработать ошибку
-                reject('Не удалось загрузить города');
-            } else {
-                let cities = JSON.parse(xhr.responseText);
-
-                cities.sort(function (a, b) {
-                    if (a.name > b.name) {
-                        return 1;
-                    }
-                    if (a.name < b.name) {
-                        return -1;
-                    }
-
-                    return 0;
-                });
-
-                resolve(cities);
-            }
-        });
-
-        xhr.addEventListener('error', () => {
-            reject('Не удалось загрузить города');
-        })
-    })
-}
+import { loadAndSortTowns as loadTowns } from "./index.js"
 
 /**
  * Функция должна проверять встречается ли подстрока chunk в строке full
