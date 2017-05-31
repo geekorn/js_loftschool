@@ -103,9 +103,10 @@ function filterCookies(chunk) {
  * @param {object} cookies - список из котороого надо сформировать таблицу
  */
 function createTable(cookies) {
-    while (listTable.rows[0]) {
-        listTable.deleteRow(0);
-    }
+    // while (listTable.rows[0]) {
+    //     listTable.deleteRow(0);
+    // }
+    listTable.innerHTML = '';
 
     let btn = '<button type="button" class="remove-cookie" style="color: red; font-weight: bold">X</button>';
 
@@ -120,15 +121,34 @@ function createTable(cookies) {
     }
 }
 
-// фильтрация
-filterNameInput.addEventListener('keyup', function () {
-    let value = this.value;
+/**
+ * Функция подготовки данных для таблицы учитывая фильтр
+ */
+function prepareAndCreateTable() {
+    let cookies;
+    let value = filterNameInput.value;
 
     if (!value) {
-        createTable(getCookie());
+        cookies = getCookie();
+    } else {
+        cookies = filterCookies(value);
     }
 
-    createTable(filterCookies(value));
+    createTable(cookies);
+}
+
+// фильтрация
+filterNameInput.addEventListener('keyup', function () {
+    prepareAndCreateTable()
+});
+
+// добавление кук
+addButton.addEventListener('click', () => {
+    let name = addNameInput.value;
+    let val = addValueInput.value;
+
+    createCookie(name, val);
+    prepareAndCreateTable()
 });
 
 // удаление кук
@@ -144,21 +164,6 @@ listTable.addEventListener('click', function (e) {
 
     this.deleteRow(rowIndex);
     deleteCookie(name);
-});
-
-// добавление кук
-addButton.addEventListener('click', () => {
-    let name = addNameInput.value;
-    let val = addValueInput.value;
-    let filter = filterNameInput.value;
-
-    createCookie(name, val);
-
-    if (filter) {
-        createTable(filterCookies(filter));
-    } else {
-        createTable(getCookie());
-    }
 });
 
 createTable(getCookie());
