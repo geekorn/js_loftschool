@@ -32,7 +32,7 @@ function loadAndSortTowns() {
         let xhr = new XMLHttpRequest();
 
         xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json', true);
-        xhr.send();
+
         xhr.addEventListener('load', () => {
             if (xhr.status !== 200) {
                 // обработать ошибку
@@ -57,7 +57,9 @@ function loadAndSortTowns() {
 
         xhr.addEventListener('error', () => {
             reject('Не удалось загрузить города');
-        })
+        });
+
+        xhr.send();
     })
 }
 

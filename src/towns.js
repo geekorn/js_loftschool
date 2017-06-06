@@ -52,7 +52,7 @@ import { loadAndSortTowns as loadTowns } from "./index.js"
  * @return {boolean}
  */
 function isMatching(full, chunk) {
-    return full.toLowerCase().includes(chunk.toLowerCase());
+    return full.toLowerCase().indexOf(chunk.toLowerCase()) !== -1;
 }
 
 let loadingBlock = homeworkContainer.querySelector('#loading-block');
