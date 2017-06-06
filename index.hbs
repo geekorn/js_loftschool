@@ -3,7 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <title>{{htmlWebpackPlugin.options.title}}</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: sans-serif;
+    }
+    .wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      background-color: #7f7f7f;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      width: 800px;
+      min-height: 300px;
+      max-height: 80vh;
+      border-radius: 15px;
+      background-color: #fff;
+    }
+    .header {
+      padding: 15px 20px;
+      background-color: #f5856f;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    .content {
+      flex: 1;
+      display: flex;
+    }
+    .column {
+      flex: 1 1 50%;
+    }
+    .column:first-child {
+      border-right: 1px solid #cecece;
+    }
+    .search {
+      padding: 10px;
+      background-color: #cecece;
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 5px 30px;
+      border-radius: 100px;
+    }
+    .friends {
+      padding: 0 15px;
+
+    }
+    .friends-title {
+      padding-top: 10px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #cecece;
+    }
+    .friends-container {
+      overflow-y: scroll;
+    }
+    .footer {
+      padding: 15px 20px;
+      background-color: #cecece;
+      text-align: right;
+    }
+    .save {
+      padding: 10px 15px;
+      background-color: #f5856f;
+      border-radius: 10px;
+      border: 0;
+      color: #ffffff;
+    }
+  </style>
+  <script src="http://vk.com/js/api/openapi.js" type="text/javascript"></script>
 </head>
 <body>
+  <div class="wrapper">
+    <div class="container">
+      <header class="header">
+        <span class="title">Выберите друзей</span>
+      </header>
+      <div class="content">
+        <div class="column">
+          <div class="search"><input type="text" placeholder="Начните вводить имя друга"></div>
+          <div class="friends all-friends">
+            <div class="friends-title">Ваши друзья</div>
+            <div class="friends-container">
+
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="search"><input type="text" placeholder="Начните вводить имя друга"></div>
+          <div class="friends selected-friends">
+            <div class="friends-title">Друзья в списке</div>
+            <div class="friends-container">
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <button type="button" class="save">Сохранить</button>
+      </footer>
+    </div>
+  </div>
 </body>
 </html>
+
+
