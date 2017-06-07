@@ -40,26 +40,9 @@ function vkApi(method, options) {
  * @param {} container - элемент DOM в который отрисовывать данные
  */
 function showFriends(friends, container) {
-    let htmlFragment = new DocumentFragment;
+    let html = templateFN(friends);
 
-    friends.forEach(friend => {
-        let template = document.createElement('div');
-
-        template.innerHTML = `
-                     <div class="friend" data-id="${friend.id}">
-                         <div class="friend__avatar">
-                            <img src="${friend.photo_100}" class="friend__img">
-                         </div>
-                         <a href="https://vk.com/id${friend.id}" class="friend__name" target="_blank">
-                            ${friend.first_name} ${friend.last_name}
-                         </a>
-                         <button class="friend__btn" type="button">+</button>
-                     </div>
-                  `;
-        htmlFragment.appendChild(template);
-    });
-
-    container.appendChild(htmlFragment);
+    container.innerHTML = html;
 }
 
 /**
@@ -68,35 +51,50 @@ function showFriends(friends, container) {
  * @param {string} filter - строка по которой фильтруем друзей
  * @return {array} массив отфильтрованных друзей
  */
-function filterFriends (array, filter) {
+function filterFriends(array, filter) {
     let filteredUsers;
 
     if (filter !== '') {
-        filteredUsers = array.filter( user => {
+        filteredUsers = array.filter(user => {
             if (user.first_name.toLowerCase().indexOf(filter) !== -1 ||
                 user.last_name.toLowerCase().indexOf(filter) !== -1) {
                 return user;
             }
         })
     } else {
-        filteredUsers = users;
+        filteredUsers = array;
     }
 
     return filteredUsers;
 }
 
-let users = [];
-let selectedUsers = [];
+let users;
+let selectedUsers ={};
 let friendsContainer = document.querySelector('.all-friends .friends-container');
 let selectedContainer = document.querySelector('.all-friends .selected-friends');
+
+let template = `
+{{#each items}}
+  <div class="friend">
+    <div class="friend__avatar">
+      <img src="{{photo_100}}" class="friend__img">
+    </div>
+    <a href="https://vk.com/id{{id}}" class="friend__name" target="_blank">
+        {{first_name}} {{last_name}}
+     </a>
+     <button class="friend__btn" type="button">+</button>
+  </div>
+{{/each}}
+`;
+let templateFN = Handlebars.compile(template);
 
 // авторизация и загрузка списка друзей ()
 // TODO - сделать авторизацию по клику на кнопке
 window.onload = function () {
     vkInit()
-        .then( () => vkApi('friends.get', {fields: 'photo_100, city'}) )
-        .then( response => {
-            users = response.items;
+        .then(() => vkApi('friends.get', {fields: 'photo_100, city'}))
+        .then(response => {
+            users = response;
             showFriends(users, friendsContainer);
         });
 };
@@ -104,12 +102,12 @@ window.onload = function () {
 // поиск
 // TODO - сделать делегированием на обе колонки
 search.addEventListener('keyup', function (e) {
-    let filter = this.value.toLowerCase();
+    let filterString = this.value.toLowerCase();
     let container = this.parentNode.nextElementSibling.children[1];
 
-    console.log(container);
     container.innerHTML = '';
-    showFriends(filterFriends(users, filter), container);
+    selectedUsers.items = filterFriends(users.items, filterString);
+    showFriends(selectedUsers, container);
 });
 
 // перенос элемента по клику на кнопке
@@ -119,7 +117,7 @@ friendsContainer.addEventListener('click', function (e) {
 
     if (target.tagName === 'BUTTON') {
         let friendID = e.target.parentNode.dataset.id;
-        let ndx = users.findIndex( item => +item.id === +friendID);
+        let ndx = users.findIndex(item => +item.id === +friendID);
 
         selectedUsers = selectedUsers.concat(users.splice(ndx, 1));
 
