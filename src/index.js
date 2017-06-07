@@ -40,9 +40,12 @@ function vkApi(method, options) {
  * @param {} container - элемент DOM в который отрисовывать данные
  */
 function showFriends(friends, container) {
-    let html = templateFN(friends);
+    if (friends.length) {
+        let obg = {items: friends};
+        let html = templateFN(obg);
 
-    container.innerHTML = html;
+        container.innerHTML = html;
+    }
 }
 
 /**
@@ -54,7 +57,7 @@ function showFriends(friends, container) {
 function filterFriends(array, filter) {
     let filteredUsers;
 
-    if (filter !== '') {
+    if (filter !== '' && array.length) {
         filteredUsers = array.filter(user => {
             if (user.first_name.toLowerCase().indexOf(filter) !== -1 ||
                 user.last_name.toLowerCase().indexOf(filter) !== -1) {
@@ -68,14 +71,14 @@ function filterFriends(array, filter) {
     return filteredUsers;
 }
 
-let users;
-let selectedUsers ={};
+let allFriends, selectFriends = [];
+let content = document.querySelector('.content');
 let friendsContainer = document.querySelector('.all-friends .friends-container');
-let selectedContainer = document.querySelector('.all-friends .selected-friends');
+let selectedContainer = document.querySelector('.selected-friends .friends-container');
 
 let template = `
 {{#each items}}
-  <div class="friend">
+  <div class="friend" data-id="{{id}}">
     <div class="friend__avatar">
       <img src="{{photo_100}}" class="friend__img">
     </div>
@@ -86,6 +89,7 @@ let template = `
   </div>
 {{/each}}
 `;
+// let template = document.querySelector('#entry-template');
 let templateFN = Handlebars.compile(template);
 
 // авторизация и загрузка списка друзей ()
@@ -94,36 +98,40 @@ window.onload = function () {
     vkInit()
         .then(() => vkApi('friends.get', {fields: 'photo_100, city'}))
         .then(response => {
-            users = response;
-            showFriends(users, friendsContainer);
+            allFriends = response.items;
+            showFriends(allFriends, friendsContainer);
         });
 };
 
-// поиск
-// TODO - сделать делегированием на обе колонки
-search.addEventListener('keyup', function (e) {
-    let filterString = this.value.toLowerCase();
-    let container = this.parentNode.nextElementSibling.children[1];
+// поиск друзей
+content.addEventListener('keyup', function (e) {
+    let target = e.target;
 
-    container.innerHTML = '';
-    selectedUsers.items = filterFriends(users.items, filterString);
-    showFriends(selectedUsers, container);
+    if (e.target.tagName === 'INPUT') {
+        let filterString = target.value.toLowerCase();
+        let container = target.parentNode.nextElementSibling.children[1];
+        let parent = target.parentNode.nextElementSibling.classList[1];
+        let friends = (parent === 'all-friends') ? allFriends : selectFriends;
+
+        container.innerHTML = '';
+        //проверка на пустой массив
+        friends = filterFriends(friends, filterString);
+        showFriends(friends, container);
+    }
 });
 
 // перенос элемента по клику на кнопке
 friendsContainer.addEventListener('click', function (e) {
     let target = e.target;
-    console.log(target);
 
     if (target.tagName === 'BUTTON') {
         let friendID = e.target.parentNode.dataset.id;
-        let ndx = users.findIndex(item => +item.id === +friendID);
 
-        selectedUsers = selectedUsers.concat(users.splice(ndx, 1));
+        let ndx = allFriends.findIndex(item => +item.id === +friendID);
 
-        console.log(selectedUsers);
-        console.log(users)
+        selectFriends = selectFriends.concat(allFriends.splice(ndx, 1));
 
-        showFriends(selectedUsers);
+        showFriends(allFriends, friendsContainer);
+        showFriends(selectFriends, selectedContainer);
     }
 });
