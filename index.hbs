@@ -25,8 +25,7 @@
       flex-direction: column;
       overflow: hidden;
       width: 800px;
-      min-height: 300px;
-      max-height: 80vh;
+      height: 80vh;
       border-radius: 15px;
       background-color: #fff;
     }
@@ -64,9 +63,34 @@
       padding-top: 10px;
       padding-bottom: 5px;
       border-bottom: 1px solid #cecece;
+      font-weight: bold;
     }
     .friends-container {
+      max-height: 400px;
       overflow-y: scroll;
+    }
+    .friend {
+      display: flex;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid #cecece;
+      transition: .4s;
+    }
+    .friend__name {
+      font-weight: bold;
+    }
+    .friend__avatar {
+      margin-right: 10px;
+      width: 50px;
+      height: 50px;
+      overflow: hidden;
+      border-radius: 50%;
+    }
+    .friend__img {
+      max-width: 100%;
+    }
+    .friend__btn {
+      margin-left: auto;
     }
     .footer {
       padding: 15px 20px;
@@ -91,11 +115,20 @@
       </header>
       <div class="content">
         <div class="column">
-          <div class="search"><input type="text" placeholder="Начните вводить имя друга"></div>
+          <div class="search"><input type="text" id="search" placeholder="Начните вводить имя друга"></div>
           <div class="friends all-friends">
             <div class="friends-title">Ваши друзья</div>
             <div class="friends-container">
-
+              <!--<script id="entry-template" type="text/x-handlebars-template">-->
+                <!--{{#each items}}-->
+                  <!--<div class="friend">-->
+                    <!--<div class="friend__avatar">-->
+                      <!--<img src="${friend.photo_100}" class="friend__img">-->
+                    <!--</div>-->
+                    <!--<div class="friend__name">${friend.first_name} ${friend.last_name}</div>-->
+                  <!--</div>-->
+                <!--{{/each}}-->
+              <!--</script>-->
             </div>
           </div>
         </div>
