@@ -46,46 +46,26 @@ function renderFriends(friends, container) {
     let input = container.querySelector('input');
     let htmlContainer = container.querySelector('.friends-container');
 
-    if (input.value) {
-        friendsList = searchFriends(friends, input.value)
-    } else {
-        friendsList = friends;
-    }
+    // if (input.value) {
+    //     friendsList = searchFriendsInArray(friends, input.value)
+    // } else {
+    //     friendsList = friends;
+    // }
 
     if (friends.length) {
-        let list = {items: friendsList};
-
-        htmlContainer.innerHTML = templateFN(list);
+        htmlContainer.innerHTML = templateFN({ items: friends });
     } else {
         htmlContainer.innerHTML = '';
     }
 }
 
-function prepareRender(friendID) {
-    // let all = [];
-    // let select = [];
-
-    for (let i = 0; i < selectFriends.length; i++) {
-        // let id = selectFriends[i].id.toString();
-        // console.log(allFriends[i].id);
-        if (selectFriends[i].id !== friendID) {
-
-            select.push(allFriends[i]);
-        } else {
-            all.push(allFriends[i]);
-        }
-    }
-
-    renderFriends(all, friendsContainer);
-    renderFriends(select, selectedContainer);
-}
 /**
  * фильтрация друзей по строке поиска
  * @param {array} friends - массив друзей в котором производим поиск
  * @param {string} filter - строка по которой фильтруем друзей
  * @return {array} массив отфильтрованных друзей
  */
-function searchFriends(friends, filter) {
+function searchFriendsInArray(friends, filter) {
     let filteredUsers;
 
     filter = filter.toLowerCase();
@@ -101,6 +81,21 @@ function searchFriends(friends, filter) {
     }
 
     return filteredUsers;
+}
+
+function searchFriendsInDOM (container) {
+    let friends = Array.from(container.querySelectorAll('.friend'));
+    let filter = container.querySelector('input').value;
+
+    friends.forEach( item => {
+        let name = item.querySelector('.friend__name').innerText;
+
+        if ( name.toLowerCase().indexOf(filter) !== -1 ) {
+            item.classList.remove('friend_hidden');
+        } else {
+            item.classList.add('friend_hidden');
+        }
+    });
 }
 
 let allFriends,
@@ -136,15 +131,17 @@ window.onload = function () {
 };
 
 // поиск друзей
-content.addEventListener('input', function (e) {
+content.addEventListener('keyup', function (e) {
     let target = e.target;
 
     if (e.target.tagName === 'INPUT') {
+        let filter = e.target.value;
         let container = target.parentNode.parentNode;
         let friendsClass = container.classList[1];
         let friends = (friendsClass === 'all-friends') ? allFriends : selectFriends;
 
-        renderFriends(friends, container);
+        searchFriendsInDOM (container);
+        // renderFriends(friends, container);
     }
 });
 
@@ -154,26 +151,28 @@ content.addEventListener('click', function (e) {
 
     if (target.tagName === 'BUTTON') {
         let friendID = e.target.parentNode.dataset.id;
+        let where;
 
-        // if (selectFriends.includes(friendID)) {
-        //     let index = selectFriends.findIndex((item) => item === friendID);
-        //
-        //     selectFriends.splice(index, 1);
-        // } else {
-        //     selectFriends.push(friendID);
-        // }
-        //
-        // console.log(selectFriends);
+        if (selectFriends.includes(friendID)) {
+            let index = selectFriends.findIndex((item) => item === friendID);
 
-        prepareRender(friendID);
-        // console.log(allFriends.includes(select));
+            selectFriends.splice(index, 1);
+            where = friendsContainer;
+        } else {
+            selectFriends.push(friendID);
+            where = selectedContainer;
+        }
 
-
-        // let ndx = allFriends.findIndex(item => +item.id === +friendID);
-        //
-        // selectFriends = selectFriends.concat(allFriends.splice(ndx, 1));
-        //
-        // renderFriends(allFriends, friendsContainer);
-        // renderFriends(selectFriends, selectedContainer);
+        moveFriend(friendID, where);
     }
 });
+
+function moveFriend(id, container) {
+    let friend = document.querySelector(`[data-id="${id}"]`);
+    let htmlContainer = container.querySelector('.friends-container');
+    let cloneFriend = friend.cloneNode(true);
+
+    htmlContainer.appendChild(cloneFriend);
+    friend.parentNode.removeChild(friend);
+    searchFriendsInDOM(container)
+}
