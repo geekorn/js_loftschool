@@ -1,3 +1,5 @@
+// let hbs = require();
+
 /**
  * VK_API
  * @return {Promise}
@@ -37,44 +39,75 @@ function vkApi(method, options) {
 /**
  * отрисовка элементов
  * @param {array} friends - массив элементов для прорисовки
- * @param {} container - элемент DOM в который отрисовывать данные
+ * @param {} container - элемент DOM, колонка в которой надо отрисовать элементы
  */
-function showFriends(friends, container) {
-    if (friends.length) {
-        let obg = {items: friends};
-        let html = templateFN(obg);
+function renderFriends(friends, container) {
+    let friendsList;
+    let input = container.querySelector('input');
+    let htmlContainer = container.querySelector('.friends-container');
 
-        container.innerHTML = html;
+    if (input.value) {
+        friendsList = searchFriends(friends, input.value)
+    } else {
+        friendsList = friends;
+    }
+
+    if (friends.length) {
+        let list = {items: friendsList};
+
+        htmlContainer.innerHTML = templateFN(list);
+    } else {
+        htmlContainer.innerHTML = '';
     }
 }
 
+function prepareRender(friendID) {
+    // let all = [];
+    // let select = [];
+
+    for (let i = 0; i < selectFriends.length; i++) {
+        // let id = selectFriends[i].id.toString();
+        // console.log(allFriends[i].id);
+        if (selectFriends[i].id !== friendID) {
+
+            select.push(allFriends[i]);
+        } else {
+            all.push(allFriends[i]);
+        }
+    }
+
+    renderFriends(all, friendsContainer);
+    renderFriends(select, selectedContainer);
+}
 /**
  * фильтрация друзей по строке поиска
- * @param {array} array - массив друзей в котором производим поиск
+ * @param {array} friends - массив друзей в котором производим поиск
  * @param {string} filter - строка по которой фильтруем друзей
  * @return {array} массив отфильтрованных друзей
  */
-function filterFriends(array, filter) {
+function searchFriends(friends, filter) {
     let filteredUsers;
 
-    if (filter !== '' && array.length) {
-        filteredUsers = array.filter(user => {
+    filter = filter.toLowerCase();
+    if (filter !== '' && friends.length) {
+        filteredUsers = friends.filter(user => {
             if (user.first_name.toLowerCase().indexOf(filter) !== -1 ||
                 user.last_name.toLowerCase().indexOf(filter) !== -1) {
                 return user;
             }
         })
     } else {
-        filteredUsers = array;
+        filteredUsers = friends;
     }
 
     return filteredUsers;
 }
 
-let allFriends, selectFriends = [];
+let allFriends,
+    selectFriends = [];
 let content = document.querySelector('.content');
-let friendsContainer = document.querySelector('.all-friends .friends-container');
-let selectedContainer = document.querySelector('.selected-friends .friends-container');
+let friendsContainer = document.querySelector('.all-friends');
+let selectedContainer = document.querySelector('.selected-friends');
 
 let template = `
 {{#each items}}
@@ -89,7 +122,6 @@ let template = `
   </div>
 {{/each}}
 `;
-// let template = document.querySelector('#entry-template');
 let templateFN = Handlebars.compile(template);
 
 // авторизация и загрузка списка друзей ()
@@ -99,39 +131,49 @@ window.onload = function () {
         .then(() => vkApi('friends.get', {fields: 'photo_100, city'}))
         .then(response => {
             allFriends = response.items;
-            showFriends(allFriends, friendsContainer);
+            renderFriends(allFriends, friendsContainer);
         });
 };
 
 // поиск друзей
-content.addEventListener('keyup', function (e) {
+content.addEventListener('input', function (e) {
     let target = e.target;
 
     if (e.target.tagName === 'INPUT') {
-        let filterString = target.value.toLowerCase();
-        let container = target.parentNode.nextElementSibling.children[1];
-        let parent = target.parentNode.nextElementSibling.classList[1];
-        let friends = (parent === 'all-friends') ? allFriends : selectFriends;
+        let container = target.parentNode.parentNode;
+        let friendsClass = container.classList[1];
+        let friends = (friendsClass === 'all-friends') ? allFriends : selectFriends;
 
-        container.innerHTML = '';
-        //проверка на пустой массив
-        friends = filterFriends(friends, filterString);
-        showFriends(friends, container);
+        renderFriends(friends, container);
     }
 });
 
 // перенос элемента по клику на кнопке
-friendsContainer.addEventListener('click', function (e) {
+content.addEventListener('click', function (e) {
     let target = e.target;
 
     if (target.tagName === 'BUTTON') {
         let friendID = e.target.parentNode.dataset.id;
 
-        let ndx = allFriends.findIndex(item => +item.id === +friendID);
+        // if (selectFriends.includes(friendID)) {
+        //     let index = selectFriends.findIndex((item) => item === friendID);
+        //
+        //     selectFriends.splice(index, 1);
+        // } else {
+        //     selectFriends.push(friendID);
+        // }
+        //
+        // console.log(selectFriends);
 
-        selectFriends = selectFriends.concat(allFriends.splice(ndx, 1));
+        prepareRender(friendID);
+        // console.log(allFriends.includes(select));
 
-        showFriends(allFriends, friendsContainer);
-        showFriends(selectFriends, selectedContainer);
+
+        // let ndx = allFriends.findIndex(item => +item.id === +friendID);
+        //
+        // selectFriends = selectFriends.concat(allFriends.splice(ndx, 1));
+        //
+        // renderFriends(allFriends, friendsContainer);
+        // renderFriends(selectFriends, selectedContainer);
     }
 });

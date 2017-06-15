@@ -65,7 +65,7 @@
       border-radius: 100px;
     }
 
-    .friends {
+    .friends-list {
       padding: 0 15px;
 
     }
@@ -136,18 +136,20 @@
     </header>
     <div class="content">
       <!--<script id="entry-template" type="text/x-handlebars-template">-->
-        <div class="column">
-          <div class="search"><input type="text" id="search" placeholder="Начните вводить имя друга"></div>
-          <div class="friends all-friends">
+        <div class="column all-friends">
+          <div class="search">
+            <input type="text" id="search" placeholder="Начните вводить имя друга">
+          </div>
+          <div class="friends-list">
             <div class="friends-title">Ваши друзья</div>
             <div class="friends-container">
 
             </div>
           </div>
         </div>
-        <div class="column">
+        <div class="column selected-friends">
           <div class="search"><input type="text" placeholder="Начните вводить имя друга"></div>
-          <div class="friends selected-friends">
+          <div class="friends-list">
             <div class="friends-title">Друзья в списке</div>
             <div class="friends-container">
 
