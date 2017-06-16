@@ -86,6 +86,7 @@
       display: flex;
       align-items: center;
       padding: 5px 0;
+      padding-right: 10px;
       border-bottom: 1px solid #cecece;
       transition: .4s;
     }
@@ -95,6 +96,12 @@
 
     .friend__name {
       font-weight: bold;
+      color: gray;
+      text-decoration: none;
+    }
+    .friend__name:hover {
+      color: darkslategray;
+      text-decoration: underline;
     }
 
     .friend__avatar {
@@ -111,10 +118,21 @@
 
     .friend__btn {
       margin-left: auto;
+      border: none;
+      outline: none;
+      background-color: transparent;
+      color: gray;
+      font-size: 2em;
+      line-height: 1;
+      font-weight: bold;
+      cursor: pointer;
     }
-    .selected-friends > .friend__btn {
+    .selected-friends .friend__btn {
       transform: rotate(45deg);
     }
+    .friend__btn:hover {
+       color: darkslategray;
+     }
 
     .footer {
       padding: 15px 20px;
@@ -128,6 +146,7 @@
       border-radius: 10px;
       border: 0;
       color: #ffffff;
+      cursor: pointer;
     }
   </style>
   <script src="http://vk.com/js/api/openapi.js" type="text/javascript"></script>

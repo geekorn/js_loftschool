@@ -42,15 +42,7 @@ function vkApi(method, options) {
  * @param {} container - элемент DOM, колонка в которой надо отрисовать элементы
  */
 function renderFriends(friends, container) {
-    let friendsList;
-    let input = container.querySelector('input');
     let htmlContainer = container.querySelector('.friends-container');
-
-    // if (input.value) {
-    //     friendsList = searchFriendsInArray(friends, input.value)
-    // } else {
-    //     friendsList = friends;
-    // }
 
     if (friends.length) {
         htmlContainer.innerHTML = templateFN({ items: friends });
@@ -98,11 +90,34 @@ function searchFriendsInDOM (container) {
     });
 }
 
+function moveFriend(id, container) {
+    let friend = document.querySelector(`[data-id="${id}"]`);
+    let htmlContainer = container.querySelector('.friends-container');
+    let cloneFriend = friend.cloneNode(true);
+
+    htmlContainer.appendChild(cloneFriend);
+    friend.parentNode.removeChild(friend);
+    searchFriendsInDOM(container)
+}
+
+function saveFriends (friends) {
+    let storage = localStorage;
+
+    storage.selectedFriends = JSON.stringify(friends);
+
+    console.log(storage);
+}
+
+function getFriendsList(whatFriends) {
+
+}
+
 let allFriends,
     selectFriends = [];
 let content = document.querySelector('.content');
 let friendsContainer = document.querySelector('.all-friends');
 let selectedContainer = document.querySelector('.selected-friends');
+let saveButton = document.querySelector('.save');
 
 let template = `
 {{#each items}}
@@ -126,7 +141,20 @@ window.onload = function () {
         .then(() => vkApi('friends.get', {fields: 'photo_100, city'}))
         .then(response => {
             allFriends = response.items;
-            renderFriends(allFriends, friendsContainer);
+
+            if (localStorage.hasOwnProperty('selectedFriends')) {
+                // console.log(JSON.parse(localStorage.selectedFriends))
+                let answer = confirm('Загрузить последнее сохранение?');
+
+                if (answer) {
+                    console.log(JSON.parse(localStorage.selectedFriends))
+                } else {
+                    renderFriends(allFriends, friendsContainer);
+                    delete localStorage.selectedFriends;
+                }
+            } else {
+                renderFriends(allFriends, friendsContainer);
+            }
         });
 };
 
@@ -135,13 +163,9 @@ content.addEventListener('keyup', function (e) {
     let target = e.target;
 
     if (e.target.tagName === 'INPUT') {
-        let filter = e.target.value;
         let container = target.parentNode.parentNode;
-        let friendsClass = container.classList[1];
-        let friends = (friendsClass === 'all-friends') ? allFriends : selectFriends;
 
         searchFriendsInDOM (container);
-        // renderFriends(friends, container);
     }
 });
 
@@ -153,26 +177,34 @@ content.addEventListener('click', function (e) {
         let friendID = e.target.parentNode.dataset.id;
         let where;
 
-        if (selectFriends.includes(friendID)) {
-            let index = selectFriends.findIndex((item) => item === friendID);
+        allFriends.forEach( item => {
+            if (item.id == friendID) {
+                if (item.selected) {
+                    item.selected = false;
+                    where = friendsContainer;
+                } else {
+                    item.selected = true;
+                    where = selectedContainer;
+                }
+            }
+        });
 
-            selectFriends.splice(index, 1);
-            where = friendsContainer;
-        } else {
-            selectFriends.push(friendID);
-            where = selectedContainer;
-        }
+        console.log(allFriends);
+
+        // if (selectFriends.includes(friendID)) {
+        //     let index = selectFriends.findIndex((item) => item === friendID);
+        //
+        //     selectFriends.splice(index, 1);
+        //     where = friendsContainer;
+        // } else {
+        //     selectFriends.push(friendID);
+        //     where = selectedContainer;
+        // }
 
         moveFriend(friendID, where);
     }
 });
 
-function moveFriend(id, container) {
-    let friend = document.querySelector(`[data-id="${id}"]`);
-    let htmlContainer = container.querySelector('.friends-container');
-    let cloneFriend = friend.cloneNode(true);
-
-    htmlContainer.appendChild(cloneFriend);
-    friend.parentNode.removeChild(friend);
-    searchFriendsInDOM(container)
-}
+saveButton.addEventListener('click', function () {
+   saveFriends(selectFriends);
+});
