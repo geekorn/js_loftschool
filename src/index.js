@@ -1,4 +1,5 @@
-// let hbs = require();
+let Template = require('./template/friends.hbs');
+let DragManager = require('./dnd');
 
 /**
  * VK_API
@@ -45,7 +46,7 @@ function renderFriends(friends, container) {
     let htmlContainer = container.querySelector('.friends-container');
 
     if (friends.length) {
-        htmlContainer.innerHTML = templateFN({ items: friends });
+        htmlContainer.innerHTML = Template({ items: friends });
     } else {
         htmlContainer.innerHTML = '';
     }
@@ -108,51 +109,46 @@ function saveFriends (friends) {
     console.log(storage);
 }
 
-function getFriendsList(whatFriends) {
+function getFriendsList(friends) {
+    let select = [];
+    let all = [];
 
+    friends.forEach( item => {
+        if (item.selected) {
+            select.push(item);
+        } else {
+            all.push(item);
+        }
+    });
+
+    renderFriends(select, selectedContainer);
+    renderFriends(all, friendsContainer);
 }
 
-let allFriends,
-    selectFriends = [];
+let allFriends;
 let content = document.querySelector('.content');
 let friendsContainer = document.querySelector('.all-friends');
 let selectedContainer = document.querySelector('.selected-friends');
 let saveButton = document.querySelector('.save');
-
-let template = `
-{{#each items}}
-  <div class="friend" data-id="{{id}}">
-    <div class="friend__avatar">
-      <img src="{{photo_100}}" class="friend__img">
-    </div>
-    <a href="https://vk.com/id{{id}}" class="friend__name" target="_blank">
-        {{first_name}} {{last_name}}
-     </a>
-     <button class="friend__btn" type="button">+</button>
-  </div>
-{{/each}}
-`;
-let templateFN = Handlebars.compile(template);
-
 // авторизация и загрузка списка друзей ()
 // TODO - сделать авторизацию по клику на кнопке
 window.onload = function () {
     vkInit()
         .then(() => vkApi('friends.get', {fields: 'photo_100, city'}))
         .then(response => {
-            allFriends = response.items;
-
             if (localStorage.hasOwnProperty('selectedFriends')) {
-                // console.log(JSON.parse(localStorage.selectedFriends))
                 let answer = confirm('Загрузить последнее сохранение?');
 
                 if (answer) {
-                    console.log(JSON.parse(localStorage.selectedFriends))
+                    allFriends = JSON.parse(localStorage.selectedFriends);
+                    getFriendsList(allFriends);
                 } else {
+                    allFriends = response.items;
                     renderFriends(allFriends, friendsContainer);
                     delete localStorage.selectedFriends;
                 }
             } else {
+                allFriends = response.items;
                 renderFriends(allFriends, friendsContainer);
             }
         });
@@ -189,22 +185,32 @@ content.addEventListener('click', function (e) {
             }
         });
 
-        console.log(allFriends);
-
-        // if (selectFriends.includes(friendID)) {
-        //     let index = selectFriends.findIndex((item) => item === friendID);
-        //
-        //     selectFriends.splice(index, 1);
-        //     where = friendsContainer;
-        // } else {
-        //     selectFriends.push(friendID);
-        //     where = selectedContainer;
-        // }
-
         moveFriend(friendID, where);
     }
 });
 
 saveButton.addEventListener('click', function () {
-   saveFriends(selectFriends);
+   saveFriends(allFriends);
 });
+
+DragManager.onDragEnd = function(dragObject, dropElem) {
+    let friendID = dragObject.elem.dataset.id;
+    let container = dropElem.parentNode.parentNode;
+
+    allFriends.forEach( item => {
+        if (item.id == friendID) {
+            if (item.selected) {
+                item.selected = false;
+            } else {
+                item.selected = true;
+            }
+        }
+    });
+    moveFriend(friendID, container);
+    dragObject.avatar.remove();
+    console.log()
+};
+
+DragManager.onDragCancel = function(dragObject) {
+    dragObject.avatar.remove();
+};
