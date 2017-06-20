@@ -62,6 +62,11 @@ module.exports = new function () {
         });
     }
 
+    /**
+     * перемещение друга по колонкам
+     * @param {number} id
+     * @param {DOM} container - куда перемещается
+     */
     function moveFriend(id, container) {
         let friend = document.querySelector(`[data-id="${id}"]`);
         let htmlContainer = container.querySelector('.friends-container');
@@ -72,14 +77,20 @@ module.exports = new function () {
         searchFriendsInDOM(container)
     }
 
+    /**
+     * сохранение в localStorage
+     * @param {array} friends
+     */
     function saveFriends(friends) {
         let storage = localStorage;
 
         storage.selectedFriends = JSON.stringify(friends);
-
-        console.log(storage);
     }
 
+    /**
+     * отрисовка 2х колонок из восстановленных данных
+     * @param {array} friends из localStorage
+     */
     function getFriendsList(friends) {
         let select = [];
         let all = [];
@@ -96,21 +107,10 @@ module.exports = new function () {
         renderFriends(all, friendsContainer);
     }
 
-//
-// TODO - сделать авторизацию по клику на кнопке
-    this.init = function(VKfriends, container) {
+    // публичные методы
+    this.init = function(friends, container) {
         friendsContainer = container.querySelector('.all');
         selectedContainer = container.querySelector('.selected');
-        // let Friends = {
-        //     all: {
-        //         items: [],
-        //         container: friendsContainer
-        //     },
-        //     selected: {
-        //         items: [],
-        //         container: selectedContainer
-        //     }
-        // };
 
         if (localStorage.hasOwnProperty('selectedFriends')) {
             let answer = confirm('Загрузить последнее сохранение?');
@@ -119,12 +119,12 @@ module.exports = new function () {
                 allFriends = JSON.parse(localStorage.selectedFriends);
                 getFriendsList(allFriends);
             } else {
-                allFriends = VKfriends;
+                allFriends = friends;
                 renderFriends(allFriends, friendsContainer);
                 delete localStorage.selectedFriends;
             }
         } else {
-            allFriends = VKfriends;
+            allFriends = friends;
             renderFriends(allFriends, friendsContainer);
         }
 
@@ -163,9 +163,7 @@ module.exports = new function () {
             }
         });
 
-        saveButton.addEventListener('click', function () {
-            saveFriends(allFriends);
-        });
+        saveButton.addEventListener('click', () => saveFriends(allFriends));
 
         DragManager.onDragEnd = function(dragObject, dropElem) {
             let friendID = dragObject.elem.dataset.id;

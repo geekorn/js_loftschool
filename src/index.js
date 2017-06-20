@@ -1,6 +1,6 @@
 let friendTemplate = require('./template/friends.hbs');
 let VKAPI = require('./VKmodel');
-let MAPAPI = require('./map');
+let FriendOnMap = require('./map');
 let FriendFilter = require('./friendsFilter');
 
 let VKID = 6062935;
@@ -12,7 +12,7 @@ window.onload = function () {
     let container = document.querySelector('.friend-list');
     let mapButton = document.querySelector('.map-btn');
     let flag;
-    let Friends = [
+    let FriendsLayouts = [
         {
             class: "all",
             title: "Ваши друзья"
@@ -29,9 +29,9 @@ window.onload = function () {
             .then((friends) => {
                 auth.classList.add('friend_hidden');
                 mapButton.classList.remove('friend_hidden');
-                container.innerHTML = friendTemplate({items: Friends});
+                container.innerHTML = friendTemplate({ items: FriendsLayouts });
                 FriendFilter.init(friends.items, container);
-                MAPAPI.init(friends.items);
+                FriendOnMap.init(friends.items);
             });
     });
 
