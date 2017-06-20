@@ -1,4 +1,4 @@
-let DragManager = new function () {
+module.exports = new function () {
     let dragObject = {};
     let that = this;
 
@@ -132,5 +132,3 @@ let DragManager = new function () {
     this.onDragEnd = function(dragobject, dropElem) {}
     this.onDragCancel = function(dragobject) {}
 };
-
-module.exports = DragManager;

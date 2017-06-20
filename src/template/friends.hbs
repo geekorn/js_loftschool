@@ -1,11 +1,12 @@
 {{#each items}}
-  <div class="friend" data-id="{{id}}">
-    <div class="friend__avatar">
-      <img src="{{photo_100}}" class="friend__img">
+  <div class="column {{class}}">
+    <div class="search">
+      <input type="text" id="search" placeholder="Начните вводить имя друга">
     </div>
-    <a href="https://vk.com/id{{id}}" class="friend__name" target="_blank">
-      {{first_name}} {{last_name}}
-    </a>
-    <button class="friend__btn" type="button">+</button>
+    <div class="friends-list">
+      <div class="friends-title">{{title}}</div>
+      <div class="friends-container">
+      </div>
+    </div>
   </div>
 {{/each}}
