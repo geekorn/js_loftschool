@@ -22,7 +22,7 @@
     }
     #map {
       width: 100%;
-      height: 90%;
+      height: 100%;
     }
     .balloon {
       width: 300px;
@@ -35,11 +35,14 @@
     .balloon__header {
       display: flex;
       justify-content: space-between;
-      padding: 5px 10px;
+      padding: 10px 15px;
       background-color: orangered;
+      color: #ffffff;
+      font-weight: bold;
     }
     .balloon__close {
-      font-weight: bold;
+      font-size: 1.3em;
+      line-height: 1;
       color: #ffffff;
       cursor: pointer;
     }
@@ -57,6 +60,7 @@
       color: orangered;
     }
     .form__field {
+      position: relative;
       display: block;
       margin-bottom: 5px;
       width: 100%;
@@ -72,6 +76,21 @@
     .textarea__control {
       resize: none;
     }
+    .random {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 5px 15px;
+      border: 1px solid #cecece;
+      border-radius: 15px;
+      background-color: lightgray;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .form__buttons {
+      display: flex;
+      justify-content: space-between;
+    }
     .form__btn {
       padding: 5px 10px;
       outline: none;
@@ -79,6 +98,73 @@
       border-radius: 10px;
       background-color: orangered;
       color: #ffffff;
+      cursor: pointer;
+    }
+    /*стили для основного балуна*/
+    .review {
+      margin-bottom: 10px;
+    }
+    .review__header {
+      margin-bottom: 10px;
+
+    }
+    .review__name {
+      font-weight: bold;
+    }
+
+    .review__body {
+      position: relative;
+      padding: 3px;
+      border: 1px solid #000;
+      border-radius: 8px;
+      background-color: lightblue;
+    }
+    .review__body:before {
+      content:'';
+      position: absolute;
+      top: 0;
+      left: 10px;
+      display: block;
+      width: 10px;
+      height: 10px;
+      border: 1px solid transparent;
+      border-left-color: #000;
+      border-top-color: #000;
+      background-color: lightblue;
+      transform: rotate(45deg) translateY(-10px);
+    }
+    .review__footer {
+      display: flex;
+      justify-content: space-around;
+      align-items: baseline;
+      margin-top: 5px;
+      font-size: 10px;
+    }
+    .review__place {
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    /* стили для кластера */
+    .cluster-balloon {
+      display: flex;
+      flex-direction: column;
+      height: 130px;
+      padding-bottom: 15px;
+    }
+    .cluster__header {
+      margin-bottom: 10px;
+    }
+    .cluster__place {
+      margin: 0;
+      margin-bottom: 5px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .cluster__message {
+      flex: 1;
+    }
+    .cluster__footer {
+      text-align: right;
     }
   </style>
 </head>
