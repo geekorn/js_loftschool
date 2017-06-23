@@ -14,6 +14,5 @@ module.exports = {
     deleteData: function () {
         delete localStorage.reviews;
         console.warn(localStorage)
-        //todo - убрать все метки с карты
     }
-}
+};
