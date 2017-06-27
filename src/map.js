@@ -12,6 +12,7 @@ module.exports = new function () {
     function getAddress(coords) {
         return ymaps.geocode(coords).then(result => result.geoObjects.get(0).getAddressLine());
     }
+
     function getCoords(address) {
         return ymaps.geocode(address).then(result => result.geoObjects.get(0).geometry.getCoordinates());
     }
@@ -66,6 +67,7 @@ module.exports = new function () {
             '<div class="form__buttons"><button class="form__btn save-review" type="button">Сохранить</button>' +
             '<button class="form__btn del-reviews" type="button">Удалить все метки</button></div>' +
             '</form></div></div></div>', {
+                // todo - сделать сдвиг карты, чтобы балун было видно полностью
                 build: function () {
                     this.constructor.superclass.build.call(this);
                     this._attachListeners();
@@ -96,16 +98,14 @@ module.exports = new function () {
                     save.removeEventListener('click', this._savePlacemark);
                     remove.removeEventListener('click', this._deleteData);
                 },
-                _closeBalloon: function () {
-                    // console.log(e)
-                    // e.preventDefault();
+                _closeBalloon: function (e) {
+                    e.preventDefault();
 
                     // map.balloon.close();
                     this.events.fire('userclose');
                 },
                 _savePlacemark: function (e) {
                     let form = e.target.closest('form');
-                    console.log(this.getData())
                     let coords = this.getData().coords ?
                         this.getData().coords :
                         this.getData().geometry.getCoordinates();
@@ -117,15 +117,17 @@ module.exports = new function () {
                     map.geoObjects.removeAll();
                     map.balloon.close();
                     storage.deleteData();
+
+                    console.log(clusterer)
                 },
                 _setFieldsRandomString: function (e) {
                     let target = e.target;
                     let form = target.closest('form');
 
-                    random.getRandomWord().then( array => {
+                    random.getRandomWord().then(array => {
                         form.name.value = array[Math.floor(Math.random() * array.length)].name;
                         form.place.value = array[Math.floor(Math.random() * array.length)].name;
-                        form.message.value = random.getRandomString(Math.floor(Math.random()*(10-4)+4));
+                        form.message.value = random.getRandomString(Math.floor(Math.random() * (10 - 4) + 4));
                     });
                 }
             }));
@@ -140,12 +142,9 @@ module.exports = new function () {
 
                     let link = this._parentElement.querySelector('.cluster__link');
 
-                    link.addEventListener('click', function(e) {
+                    link.addEventListener('click', function (e) {
                         e.preventDefault();
-                        console.log(e);
-                        console.log(this);
-
-                        getCoords(e.target.innerText).then( coords => openBalloon(coords));
+                        getCoords(e.target.innerText).then(coords => openBalloon(coords));
                     }.bind(this))
                 }
             }
@@ -177,7 +176,17 @@ module.exports = new function () {
     }
 
     /**
-     * подготовка данных, сохранение отзыва и установка
+     * установка метки
+     * @param {object} review - объект с данными отзыва
+     */
+    function setPlacemark(review) {
+        clusterer.add(createPlacemark(review));
+        updateBalloon(review);
+
+    }
+
+    /**
+     * сохранение отзыва
      * @param form - форма с полями ввода
      * @param coords - координаты места
      */
@@ -191,18 +200,14 @@ module.exports = new function () {
                 coords: coords,
                 date: new Date().toLocaleString('ru', {})
             };
-            let placemark = createPlacemark(review);
-
-            // todo - убрать создание метки в отдельную функцию
 
             reviews.push(review);
-            clusterer.add(placemark);
-            map.balloon.setData({ // обновляем данные в балуне
-                address: address,
-                coords: coords,
-                reviews: getReviews(review.address)
-            });
-            storage.setData(reviews); // сохраняем отзывы в локалсторадж
+
+            if (storage.exist()) {
+                storage.setData(reviews);
+            }
+
+            setPlacemark(review);
         });
     }
 
@@ -218,9 +223,21 @@ module.exports = new function () {
                 reviews: getReviews(address)
             }, {
                 layout: 'balloon#maximize',
-                contentLayout: 'balloon#reviews'
-                // todo - сделать сдвиг карты, чтобы балун было видно полностью
+                contentLayout: 'balloon#reviews',
+                autoPan: true
             });
+        });
+    }
+
+    /**
+     * Обновить список отзывов в балуне
+     * @param {object} review
+     */
+    function updateBalloon(review) {
+        map.balloon.setData({ // обновляем данные в балуне
+            address: review.address,
+            coords: review.coords,
+            reviews: getReviews(review.address)
         });
     }
 
@@ -271,9 +288,9 @@ module.exports = new function () {
             // Устанавливаем максимальное количество элементов в нижней панели на одной странице
             // clusterBalloonPagerSize: 5
         });
-        reviews = storage.getData();
 
-        if (reviews) {
+        if (storage.exist()) {
+            reviews = storage.getData();
             // console.log('отзывы из LocalStorage', reviews);
             clusterer.add(reviews.map(item => createPlacemark(item)))
         }
@@ -282,20 +299,21 @@ module.exports = new function () {
         // map.setBounds(map.geoObjects.getBounds()); // при открытии карта будет центрироваться по меткам
 
         map.events.add('click', function (e) {
-                if (!map.balloon.isOpen()) {
-                    let coords = e.get('coords');
+            if (!map.balloon.isOpen()) {
+                let coords = e.get('coords');
 
-                    openBalloon(coords);
-                } else {
-                    map.balloon.close();
-                }
-            });
+                openBalloon(coords);
+            } else {
+                map.balloon.close();
+            }
+        });
+
         clusterer.events.add('click', function (e) {
             let target = e.get('target');
             let geoObjectState = clusterer.getObjectState(target);
 
             if (geoObjectState.isShown) {
-            // Если объект не попал в кластер, открываем его собственный балун.
+                // Если объект не попал в кластер, открываем его собственный балун.
                 openBalloon(target.geometry.getCoordinates());
             }
         });

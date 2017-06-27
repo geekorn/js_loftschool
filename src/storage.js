@@ -1,18 +1,24 @@
-module.exports = {
-    setData: function (data) {
-        let storage = localStorage;
+module.exports = new function () {
+    let storage = window.localStorage;
+    let key = 'reviews';
 
-        storage.reviews = JSON.stringify(data);
-    },
-    getData: function () {
-        if (localStorage.reviews) {
-            return JSON.parse(localStorage.reviews);
+    this.exist = () => storage;
+
+    this.getData = function () {
+        if (storage[key]) {
+            return JSON.parse(storage.getItem(key));
         }
 
         return [];
-    },
-    deleteData: function () {
-        delete localStorage.reviews;
+    };
+
+    this.setData = function (data) {
+        storage.setItem(key, JSON.stringify(data));
+    };
+
+    this.deleteData = function () {
+        storage.removeItem(key);
+
         console.warn(localStorage)
-    }
+    };
 };
