@@ -12,7 +12,6 @@ module.exports = new function () {
     function getAddress(coords) {
         return ymaps.geocode(coords).then(result => result.geoObjects.get(0).getAddressLine());
     }
-
     function getCoords(address) {
         return ymaps.geocode(address).then(result => result.geoObjects.get(0).geometry.getCoordinates());
     }
@@ -71,12 +70,25 @@ module.exports = new function () {
                 build: function () {
                     this.constructor.superclass.build.call(this);
                     this._attachListeners();
+                    // debugger;
                     // console.warn('конструктор балуна', this.getData());
                     // console.log('координаты балуна', map.balloon.getPosition())
                 },
                 clear: function () {
                     this._detachListeners();
                     this.constructor.superclass.clear.call(this);
+                },
+                getShape: function () {
+                    let el = this.getElement();
+
+                    if (el) {
+                        return new ymaps.shape.Rectangle(
+                            new ymaps.geometry.pixel.Rectangle([
+                                [0, 0],
+                                [el.firstChild.offsetWidth, el.firstChild.offsetHeight]
+                            ])
+                        )
+                    }
                 },
                 _attachListeners: function () {
                     let close = this._parentElement.querySelector('.balloon__close');
@@ -169,6 +181,7 @@ module.exports = new function () {
             },
             {
                 hasBalloon: false,
+                openBalloonOnClick: false
                 // hideIconOnBalloonOpen: false,
                 // balloonContentLayout: 'balloon#reviews',
                 // balloonLayout: 'balloon#maximize'
@@ -182,7 +195,6 @@ module.exports = new function () {
     function setPlacemark(review) {
         clusterer.add(createPlacemark(review));
         updateBalloon(review);
-
     }
 
     /**
@@ -226,6 +238,7 @@ module.exports = new function () {
                 contentLayout: 'balloon#reviews',
                 autoPan: true
             });
+            // map.balloon.autoPan();
         });
     }
 
