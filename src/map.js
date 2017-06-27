@@ -126,8 +126,8 @@ module.exports = new function () {
                 },
                 _deleteData: function () {
                     // todo - после удаления меток новые не устанавливаються, посмотреть почему
-                    map.geoObjects.removeAll();
                     map.balloon.close();
+                    clusterer.removeAll();
                     storage.deleteData();
 
                     console.log(clusterer)
@@ -303,6 +303,7 @@ module.exports = new function () {
         });
 
         if (storage.exist()) {
+            console.log(window.localStorage)
             reviews = storage.getData();
             // console.log('отзывы из LocalStorage', reviews);
             clusterer.add(reviews.map(item => createPlacemark(item)))
