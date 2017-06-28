@@ -3,22 +3,7 @@ module.exports = new function () {
     let key = 'reviews';
 
     this.exist = () => storage;
-
-    this.getData = function () {
-        if (storage[key]) {
-            return JSON.parse(storage.getItem(key));
-        }
-
-        return [];
-    };
-
-    this.setData = function (data) {
-        storage.setItem(key, JSON.stringify(data));
-    };
-
-    this.deleteData = function () {
-        storage.removeItem(key);
-
-        console.warn(localStorage)
-    };
+    this.getData = () => storage[key] ? JSON.parse(storage.getItem(key)) : [];
+    this.setData = (data) => storage.setItem(key, JSON.stringify(data));
+    this.deleteData = () => storage.removeItem(key);
 };

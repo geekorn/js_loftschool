@@ -5,15 +5,28 @@ module.exports = new function () {
     // объявление переменных
     let map,
         clusterer,
-        balloon,
         reviews = []; // массив для хранения отзывов
 
     // приватные функции
+
+    /**
+     * функции получения координат по адресу и наоборот
+     * @return {Promise}
+     */
     function getAddress(coords) {
         return ymaps.geocode(coords).then(result => result.geoObjects.get(0).getAddressLine());
     }
     function getCoords(address) {
         return ymaps.geocode(address).then(result => result.geoObjects.get(0).geometry.getCoordinates());
+    }
+
+    /**
+     * получение отзывов по конкретному адресу
+     * @param address
+     * @return {Array.<*>}
+     */
+    function getReviews(address) {
+        return reviews.filter(item => item.address == address).reverse();
     }
 
     /**
@@ -69,10 +82,12 @@ module.exports = new function () {
                 // todo - сделать сдвиг карты, чтобы балун было видно полностью
                 build: function () {
                     this.constructor.superclass.build.call(this);
+                    this.close = this._parentElement.querySelector('.balloon__close');
+                    this.save = this._parentElement.querySelector('.save-review');
+                    this.remove = this._parentElement.querySelector('.del-reviews');
+                    this.random = this._parentElement.querySelector('.random');
+
                     this._attachListeners();
-                    // debugger;
-                    // console.warn('конструктор балуна', this.getData());
-                    // console.log('координаты балуна', map.balloon.getPosition())
                 },
                 clear: function () {
                     this._detachListeners();
@@ -91,29 +106,19 @@ module.exports = new function () {
                     }
                 },
                 _attachListeners: function () {
-                    let close = this._parentElement.querySelector('.balloon__close');
-                    let save = this._parentElement.querySelector('.save-review');
-                    let remove = this._parentElement.querySelector('.del-reviews');
-                    let random = this._parentElement.querySelector('.random');
-
-                    random.addEventListener('click', this._setFieldsRandomString);
-                    close.addEventListener('click', this._closeBalloon.bind(this));
-                    save.addEventListener('click', this._savePlacemark.bind(this));
-                    remove.addEventListener('click', this._deleteData);
+                    this.random.addEventListener('click', this._setFieldsRandomString);
+                    this.close.addEventListener('click', this._closeBalloon.bind(this));
+                    this.save.addEventListener('click', this._savePlacemark.bind(this));
+                    this.remove.addEventListener('click', this._deleteData);
                 },
                 _detachListeners: function () {
-                    let close = this._parentElement.querySelector('.balloon__close');
-                    let save = this._parentElement.querySelector('.save-review');
-                    let remove = this._parentElement.querySelector('.del-reviews');
-
-                    close.removeEventListener('click', this._closeBalloon);
-                    save.removeEventListener('click', this._savePlacemark);
-                    remove.removeEventListener('click', this._deleteData);
+                    this.random.removeEventListener('click', this._setFieldsRandomString);
+                    this.close.removeEventListener('click', this._closeBalloon);
+                    this.save.removeEventListener('click', this._savePlacemark);
+                    this.remove.removeEventListener('click', this._deleteData);
                 },
                 _closeBalloon: function (e) {
                     e.preventDefault();
-
-                    // map.balloon.close();
                     this.events.fire('userclose');
                 },
                 _savePlacemark: function (e) {
@@ -125,12 +130,10 @@ module.exports = new function () {
                     saveReview(form, coords);
                 },
                 _deleteData: function () {
-                    // todo - после удаления меток новые не устанавливаються, посмотреть почему
                     map.balloon.close();
                     clusterer.removeAll();
+                    reviews.length = 0;
                     storage.deleteData();
-
-                    console.log(clusterer)
                 },
                 _setFieldsRandomString: function (e) {
                     let target = e.target;
@@ -157,7 +160,7 @@ module.exports = new function () {
                     link.addEventListener('click', function (e) {
                         e.preventDefault();
                         getCoords(e.target.innerText).then(coords => openBalloon(coords));
-                    }.bind(this))
+                    })
                 }
             }
         ));
@@ -182,9 +185,6 @@ module.exports = new function () {
             {
                 hasBalloon: false,
                 openBalloonOnClick: false
-                // hideIconOnBalloonOpen: false,
-                // balloonContentLayout: 'balloon#reviews',
-                // balloonLayout: 'balloon#maximize'
             });
     }
 
@@ -214,12 +214,8 @@ module.exports = new function () {
             };
 
             reviews.push(review);
-
-            if (storage.exist()) {
-                storage.setData(reviews);
-            }
-
             setPlacemark(review);
+            storage.exist() && storage.setData(reviews);
         });
     }
 
@@ -235,10 +231,8 @@ module.exports = new function () {
                 reviews: getReviews(address)
             }, {
                 layout: 'balloon#maximize',
-                contentLayout: 'balloon#reviews',
-                autoPan: true
+                contentLayout: 'balloon#reviews'
             });
-            // map.balloon.autoPan();
         });
     }
 
@@ -247,20 +241,11 @@ module.exports = new function () {
      * @param {object} review
      */
     function updateBalloon(review) {
-        map.balloon.setData({ // обновляем данные в балуне
+        map.balloon.setData({
             address: review.address,
             coords: review.coords,
             reviews: getReviews(review.address)
         });
-    }
-
-    /**
-     * получение отзывов по конкретному адресу
-     * @param address
-     * @return {Array.<*>}
-     */
-    function getReviews(address) {
-        return reviews.filter(item => item.address == address).reverse();
     }
 
     // публичные методы
@@ -303,14 +288,13 @@ module.exports = new function () {
         });
 
         if (storage.exist()) {
-            console.log(window.localStorage)
             reviews = storage.getData();
-            // console.log('отзывы из LocalStorage', reviews);
             clusterer.add(reviews.map(item => createPlacemark(item)))
         }
 
         map.geoObjects.add(clusterer);
-        // map.setBounds(map.geoObjects.getBounds()); // при открытии карта будет центрироваться по меткам
+        clusterer.getGeoObjects().length && map.setBounds(map.geoObjects.getBounds(), {
+            checkZoomRange: true, zoomMargin: 30 }); // метки центрируются при загрузке карты
 
         map.events.add('click', function (e) {
             if (!map.balloon.isOpen()) {
