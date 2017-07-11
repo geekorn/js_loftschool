@@ -1,11 +1,12 @@
-let storage = require('./storage');
+let Storage = require('./storage');
 let random = require('./random');
 
 module.exports = new function () {
     // объявление переменных
     let map,
         clusterer,
-        reviews = []; // массив для хранения отзывов
+        reviews = [],
+        storage = false;
 
     // приватные функции
 
@@ -133,7 +134,7 @@ module.exports = new function () {
                     map.balloon.close();
                     clusterer.removeAll();
                     reviews.length = 0;
-                    storage.deleteData();
+                    storage && Storage.deleteData();
                 },
                 _setFieldsRandomString: function (e) {
                     let target = e.target;
@@ -215,7 +216,7 @@ module.exports = new function () {
 
             reviews.push(review);
             setPlacemark(review);
-            storage.exist() && storage.setData(reviews);
+            storage && Storage.setData(reviews);
         });
     }
 
@@ -287,14 +288,19 @@ module.exports = new function () {
             // clusterBalloonPagerSize: 5
         });
 
-        if (storage.exist()) {
-            reviews = storage.getData();
+        if (Storage.exist()) {
+            storage = true;
+            reviews = Storage.getData();
             clusterer.add(reviews.map(item => createPlacemark(item)))
         }
 
         map.geoObjects.add(clusterer);
+        // метки центрируются при загрузке карты
         clusterer.getGeoObjects().length && map.setBounds(map.geoObjects.getBounds(), {
-            checkZoomRange: true, zoomMargin: 30 }); // метки центрируются при загрузке карты
+            checkZoomRange: true, zoomMargin: 30 })
+            .then( () => {
+                (map.getZoom() > 15) && map.setZoom(15);
+            });
 
         map.events.add('click', function (e) {
             if (!map.balloon.isOpen()) {
@@ -310,8 +316,8 @@ module.exports = new function () {
             let target = e.get('target');
             let geoObjectState = clusterer.getObjectState(target);
 
+            // Если объект не попал в кластер, открываем его собственный балун.
             if (geoObjectState.isShown) {
-                // Если объект не попал в кластер, открываем его собственный балун.
                 openBalloon(target.geometry.getCoordinates());
             }
         });
